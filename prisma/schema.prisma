@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
@@ -26,8 +27,9 @@ model User {
   password     String
   role         Role     @default(VIEWER)
   avatar       String?
-  posts        Post[]
-  refreshToken String?
+  posts           Post[]
+  websiteContents WebsiteContent[]
+  refreshToken    String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -68,13 +70,209 @@ model Tag {
 }
 
 model Media {
-  id        Int      @id @default(autoincrement())
-  filename  String
+  id           Int      @id @default(autoincrement())
+  filename     String
   originalName String
-  url       String
-  mimeType  String
-  size      Int
-  post      Post?    @relation(fields: [postId], references: [id], onDelete: SetNull)
-  postId    Int?
+  url          String
+  mimeType     String
+  size         Int
+  post         Post?    @relation(fields: [postId], references: [id], onDelete: SetNull)
+  postId       Int?
+  createdAt    DateTime @default(now())
+}
+
+model Vehicle {
+  id                 Int             @id @default(autoincrement())
+  registrationNumber String          @unique
+  make               String?
+  model              String?
+  year               Int?
+  image              String?
+  vehicleTypeId      Int?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  drivers            DriverVehicle[]
+  assignments        SupervisorAssignment[]
+  loads              Load[]
+
+  vehicleType VehicleType? @relation(fields: [vehicleTypeId], references: [id], onDelete: SetNull)
+}
+
+model Driver {
+  id             Int             @id @default(autoincrement())
+  name           String
+  licenseNumber  String          @unique
+  phone          String?
+  fileAttachment String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  vehicles       DriverVehicle[]
+  assignments    SupervisorAssignment[]
+  loads          Load[]
+}
+
+model DriverVehicle {
+  driverId   Int
+  vehicleId  Int
+  assignedAt DateTime @default(now())
+
+  driver  Driver  @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@id([driverId, vehicleId])
+}
+
+// Website CMS content stored per page + section
+model WebsiteContent {
+  id        Int      @id @default(autoincrement())
+  page      String   // "home" | "contact" | "projects" | "site"
+  section   String   // e.g. "about", "mission", "services", "whyChoose", "faqs", "philosophy", "environmentalBenefits", "wasteToEnergy", "quickServices"
+  content   Json     // section data matching the shape from static data files
+  isActive  Boolean  @default(true)
+  updatedBy Int?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  editor User? @relation(fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@unique([page, section])
+  @@index([page])
+  @@map("website_content")
+}
+
+// Hero slides are a separate repeating list
+model HeroSlide {
+  id           Int      @id @default(autoincrement())
+  order        Int      @default(0)
+  background   String
+  subtitle     String
+  title        String
+  text         String   @db.Text
+  buttonText   String
+  buttonLink   String
+  badgeTitle   String?
+  badgeSubtitle String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([order])
+  @@map("hero_slides")
+}
+
+model ContactSubmission {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String?
+  service   String?
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@map("contact_submissions")
+}
+
+// ─── Supervisor Management ───────────────────────────────────────────────────
+
+model Supervisor {
+  id          Int      @id @default(autoincrement())
+  name        String
+  employeeId  String   @unique
+  phone       String?
+  email       String?  @unique
+  zone        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assignments SupervisorAssignment[]
+  loads       Load[]
+
+  @@map("supervisors")
+}
+
+model SupervisorAssignment {
+  id           Int        @id @default(autoincrement())
+  supervisorId Int
+  driverId     Int
+  vehicleId    Int?
+  startDate    DateTime
+  endDate      DateTime?
+  notes        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  supervisor Supervisor @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
+  driver     Driver     @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  vehicle    Vehicle?   @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+
+  @@map("supervisor_assignments")
+}
+
+// ─── Vehicle Setup ───────────────────────────────────────────────────────────
+
+model VehicleType {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  capacity    Float?
+  unit        String?   // e.g. "tonnes", "litres"
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  vehicles Vehicle[]
+
+  @@map("vehicle_types")
+}
+
+// ─── Load Monitoring ─────────────────────────────────────────────────────────
+
+enum LoadStatus {
+  PENDING
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+model Load {
+  id           Int        @id @default(autoincrement())
+  loadNumber   String     @unique
+  vehicleId    Int
+  driverId     Int
+  supervisorId Int?
+  origin       String
+  destination  String
+  material     String?
+  quantity     Float?
+  unit         String?
+  status       LoadStatus @default(PENDING)
+  scheduledAt  DateTime?
+  startedAt    DateTime?
+  deliveredAt  DateTime?
+  notes        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  vehicle    Vehicle     @relation(fields: [vehicleId], references: [id])
+  driver     Driver      @relation(fields: [driverId], references: [id])
+  supervisor Supervisor? @relation(fields: [supervisorId], references: [id], onDelete: SetNull)
+  history    LoadHistory[]
+
+  @@index([status])
+  @@index([vehicleId])
+  @@index([driverId])
+  @@map("loads")
+}
+
+model LoadHistory {
+  id        Int        @id @default(autoincrement())
+  loadId    Int
+  status    LoadStatus
+  note      String?
+  changedAt DateTime   @default(now())
+
+  load Load @relation(fields: [loadId], references: [id], onDelete: Cascade)
+
+  @@index([loadId])
+  @@map("load_history")
 }

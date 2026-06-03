@@ -1,7 +1,7 @@
 {
-  "name": "contenthub-server",
+  "name": "eshaenterprises-server",
   "version": "1.0.0",
-  "description": "ContentHub CMS - Express Backend",
+  "description": "EshaEnterprises - Express Backend",
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon src/index.js",

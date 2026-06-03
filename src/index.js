@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -10,6 +11,16 @@ const categoryRoutes = require("./routes/categories");
 const mediaRoutes = require("./routes/media");
 const userRoutes = require("./routes/users");
 const dashboardRoutes = require("./routes/dashboard");
+const driverRoutes = require("./routes/drivers");
+const vehicleRoutes = require("./routes/vehicles");
+const supervisorRoutes = require("./routes/supervisors");
+const supervisorAssignmentRoutes = require("./routes/supervisorAssignments");
+const vehicleTypeRoutes = require("./routes/vehicleTypes");
+const loadRoutes = require("./routes/loads");
+const loadHistoryRoutes = require("./routes/loadHistory");
+const reportsRoutes = require("./routes/reports");
+const websiteContentRoutes = require("./routes/websiteContent");
+const pagesRoutes = require("./routes/pages");
 
 const app = express();
 
@@ -34,6 +45,16 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/drivers", driverRoutes);
+app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/supervisors", supervisorRoutes);
+app.use("/api/supervisor-assignments", supervisorAssignmentRoutes);
+app.use("/api/vehicle-types", vehicleTypeRoutes);
+app.use("/api/loads", loadRoutes);
+app.use("/api/load-history", loadHistoryRoutes);
+app.use("/api/reports", reportsRoutes);
+app.use("/api/website-content", websiteContentRoutes);
+app.use("/api", pagesRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "description": "EshaEnterprises - Express Backend",
   "main": "src/index.js",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
     "postinstall": "prisma generate",
+    "vercel-build": "prisma generate",
     "migrate": "npx prisma migrate dev",
     "seed": "node prisma/seed.js",
     "studio": "npx prisma studio"

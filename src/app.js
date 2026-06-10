@@ -29,6 +29,7 @@ const allowedOrigins = [
   config.clientUrl,
   "http://localhost:5173",
   "http://localhost:3000",
+  "https://esha-portal.vercel.app",
 ].filter(Boolean);
 
 app.use(

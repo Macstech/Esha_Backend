@@ -9,9 +9,10 @@ datasource db {
 }
 
 enum Role {
-  SUPER_ADMIN
-  EDITOR
-  VIEWER
+  ADMIN
+  VENDOR
+  DRIVER
+  SUPERVISOR
 }
 
 enum PostStatus {

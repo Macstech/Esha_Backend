@@ -6,7 +6,7 @@ const upload = require("../middleware/upload");
 
 router.get("/", authenticate, mediaController.list);
 router.get("/:id", authenticate, mediaController.getOne);
-router.post("/", authenticate, authorize("SUPER_ADMIN", "EDITOR"), upload.single("file"), mediaController.upload);
-router.delete("/:id", authenticate, authorize("SUPER_ADMIN"), mediaController.remove);
+router.post("/", authenticate, authorize("ADMIN"), upload.single("file"), mediaController.upload);
+router.delete("/:id", authenticate, authorize("ADMIN"), mediaController.remove);
 
 module.exports = router;

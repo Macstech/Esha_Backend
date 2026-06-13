@@ -10,10 +10,10 @@ router.get("/content/by-section", c.getBySectionContent);
 router.get("/content/:id", c.getOneContent);
 
 // Write operations require authentication
-router.post("/content", authenticate, authorize("SUPER_ADMIN", "EDITOR"), c.createContent);
-router.put("/content/upsert", authenticate, authorize("SUPER_ADMIN", "EDITOR"), c.upsertContent);
-router.patch("/content/:id", authenticate, authorize("SUPER_ADMIN", "EDITOR"), c.updateContent);
-router.delete("/content/:id", authenticate, authorize("SUPER_ADMIN"), c.removeContent);
+router.post("/content", authenticate, authorize("ADMIN"), c.createContent);
+router.put("/content/upsert", authenticate, authorize("ADMIN"), c.upsertContent);
+router.patch("/content/:id", authenticate, authorize("ADMIN"), c.updateContent);
+router.delete("/content/:id", authenticate, authorize("ADMIN"), c.removeContent);
 
 // ── HeroSlides ──────────────────────────────────────────
 // Public read
@@ -21,8 +21,8 @@ router.get("/slides", c.listSlides);
 router.get("/slides/:id", c.getOneSlide);
 
 // Write operations require authentication
-router.post("/slides", authenticate, authorize("SUPER_ADMIN", "EDITOR"), c.createSlide);
-router.patch("/slides/:id", authenticate, authorize("SUPER_ADMIN", "EDITOR"), c.updateSlide);
-router.delete("/slides/:id", authenticate, authorize("SUPER_ADMIN"), c.removeSlide);
+router.post("/slides", authenticate, authorize("ADMIN"), c.createSlide);
+router.patch("/slides/:id", authenticate, authorize("ADMIN"), c.updateSlide);
+router.delete("/slides/:id", authenticate, authorize("ADMIN"), c.removeSlide);
 
 module.exports = router;

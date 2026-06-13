@@ -22,6 +22,10 @@ const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    if (user.role === "DRIVER") {
+      return res.status(403).json({ message: "Drivers must use the mobile app to sign in" });
+    }
+
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
@@ -60,7 +64,7 @@ const register = async (req, res) => {
         name,
         email,
         password: hashedPassword,
-        role: role || "VIEWER",
+        role: role || "VENDOR",
       },
     });
 

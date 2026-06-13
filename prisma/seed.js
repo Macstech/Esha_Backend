@@ -6,39 +6,27 @@ const prisma = new PrismaClient();
 async function main() {
   // Create users
   const adminPassword = await bcrypt.hash("admin123", 10);
-  const editorPassword = await bcrypt.hash("editor123", 10);
-  const viewerPassword = await bcrypt.hash("viewer123", 10);
+  const supervisorPassword = await bcrypt.hash("supervisor123", 10);
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@contenthub.com" },
     update: {},
     create: {
-      name: "Super Admin",
+      name: "Admin",
       email: "admin@contenthub.com",
       password: adminPassword,
-      role: "SUPER_ADMIN",
+      role: "ADMIN",
     },
   });
 
-  const editor = await prisma.user.upsert({
-    where: { email: "editor@contenthub.com" },
+  const supervisor = await prisma.user.upsert({
+    where: { email: "supervisor@contenthub.com" },
     update: {},
     create: {
-      name: "Editor User",
-      email: "editor@contenthub.com",
-      password: editorPassword,
-      role: "EDITOR",
-    },
-  });
-
-  const viewer = await prisma.user.upsert({
-    where: { email: "viewer@contenthub.com" },
-    update: {},
-    create: {
-      name: "Viewer User",
-      email: "viewer@contenthub.com",
-      password: viewerPassword,
-      role: "VIEWER",
+      name: "Supervisor User",
+      email: "supervisor@contenthub.com",
+      password: supervisorPassword,
+      role: "SUPERVISOR",
     },
   });
 
@@ -94,7 +82,7 @@ async function main() {
       content: "<p>Express.js combined with Prisma ORM provides a fast and type-safe way to build REST APIs. This tutorial covers setting up models, controllers, and routes.</p><p>We'll also look at pagination, filtering, and sorting — essential features for any admin panel.</p>",
       excerpt: "A complete guide to building REST APIs with Express and Prisma.",
       status: "PUBLISHED",
-      authorId: editor.id,
+      authorId: admin.id,
       categories: { connect: [{ id: categories[0].id }] },
       tags: { connect: [{ id: tags[1].id }, { id: tags[2].id }] },
       viewCount: 189,
@@ -105,7 +93,7 @@ async function main() {
       content: "<p>A well-structured design system can dramatically speed up the development of admin interfaces. Learn how to leverage Ant Design's component library effectively.</p>",
       excerpt: "How to build effective design systems for admin UIs.",
       status: "DRAFT",
-      authorId: editor.id,
+      authorId: admin.id,
       categories: { connect: [{ id: categories[1].id }] },
       tags: { connect: [{ id: tags[0].id }] },
       viewCount: 0,
@@ -420,7 +408,7 @@ async function main() {
   }
 
   console.log("✅ Seed data created successfully!");
-  console.log("   - 3 Users (admin, editor, viewer)");
+  console.log("   - 2 Users (admin, supervisor)");
   console.log("   - 4 Categories");
   console.log("   - 5 Tags");
   console.log("   - 4 Sample Posts");

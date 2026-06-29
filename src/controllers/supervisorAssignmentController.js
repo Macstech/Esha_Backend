@@ -1,7 +1,8 @@
-const { PrismaClient } = require("@prisma/client");
+const { prisma } = require("../config/prisma");
+
 const { parseRefineParams } = require("../utils/queryHelper");
 
-const prisma = new PrismaClient();
+
 
 const include = {
   supervisor: { select: { id: true, name: true, employeeId: true } },

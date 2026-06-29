@@ -1,7 +1,8 @@
-const { PrismaClient } = require("@prisma/client");
+const { prisma } = require("../config/prisma");
+
 const { homeDefaults, siteDefaults } = require("../data/staticDefaults");
 
-const prisma = new PrismaClient();
+
 
 // Deep merge DB content with defaults — ensures no field is ever missing.
 // Arrays: DB value wins if non-empty, otherwise fallback to default.

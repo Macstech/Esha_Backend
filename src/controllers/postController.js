@@ -1,8 +1,9 @@
-const { PrismaClient } = require("@prisma/client");
+const { prisma } = require("../config/prisma");
+
 const { parseRefineParams } = require("../utils/queryHelper");
 const { slugify } = require("../utils/slugify");
 
-const prisma = new PrismaClient();
+
 
 const list = async (req, res) => {
   try {

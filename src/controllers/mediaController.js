@@ -1,9 +1,7 @@
-const { PrismaClient } = require("@prisma/client");
+const { prisma } = require("../config/prisma");
 const { parseRefineParams } = require("../utils/queryHelper");
 const fs = require("fs");
 const path = require("path");
-
-const prisma = new PrismaClient();
 
 const list = async (req, res) => {
   try {
@@ -28,11 +26,7 @@ const getOne = async (req, res) => {
     const media = await prisma.media.findUnique({
       where: { id: parseInt(req.params.id) },
     });
-
-    if (!media) {
-      return res.status(404).json({ message: "Media not found" });
-    }
-
+    if (!media) return res.status(404).json({ message: "Media not found" });
     res.json(media);
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
@@ -46,16 +40,21 @@ const upload = async (req, res) => {
     }
 
     const { file } = req;
-    const url = `/uploads/${file.filename}`;
+
+    // Cloudinary returns path/secure_url; disk returns filename
+    const url = file.path || `/uploads/${file.filename}`;
+    const filename = file.filename || file.originalname;
 
     const media = await prisma.media.create({
       data: {
-        filename: file.filename,
+        filename,
         originalName: file.originalname,
         url,
         mimeType: file.mimetype,
         size: file.size,
         postId: req.body.postId ? parseInt(req.body.postId) : null,
+        // Optional: link document to a specific load
+        loadId: req.body.loadId ? parseInt(req.body.loadId) : null,
       },
     });
 
@@ -71,21 +70,15 @@ const remove = async (req, res) => {
     const media = await prisma.media.findUnique({
       where: { id: parseInt(req.params.id) },
     });
+    if (!media) return res.status(404).json({ message: "Media not found" });
 
-    if (!media) {
-      return res.status(404).json({ message: "Media not found" });
+    // Only delete local files (Cloudinary manages its own storage)
+    if (media.url.startsWith("/uploads/")) {
+      const filePath = path.join(process.cwd(), media.url);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     }
 
-    // Delete file from disk
-    const filePath = path.join(process.cwd(), media.url);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-
-    await prisma.media.delete({
-      where: { id: parseInt(req.params.id) },
-    });
-
+    await prisma.media.delete({ where: { id: parseInt(req.params.id) } });
     res.json({ message: "Media deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });

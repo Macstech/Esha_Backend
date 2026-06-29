@@ -1,7 +1,8 @@
-const { PrismaClient } = require("@prisma/client");
+const { prisma } = require("../config/prisma");
+
 const { parseRefineParams } = require("../utils/queryHelper");
 
-const prisma = new PrismaClient();
+
 
 const include = {
   vehicle: { select: { id: true, registrationNumber: true, make: true, model: true } },
@@ -55,8 +56,8 @@ const create = async (req, res) => {
     const load = await prisma.load.create({
       data: {
         loadNumber,
-        vehicleId: parseInt(vehicleId),
-        driverId: parseInt(driverId),
+        vehicleId: vehicleId ? parseInt(vehicleId) : null,
+        driverId: driverId ? parseInt(driverId) : null,
         supervisorId: supervisorId ? parseInt(supervisorId) : null,
         origin,
         destination,

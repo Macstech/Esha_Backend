@@ -10,7 +10,7 @@
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate",
+    "vercel-build": "prisma migrate deploy && prisma generate",
     "migrate": "npx prisma migrate dev",
     "seed": "node prisma/seed.js",
     "studio": "npx prisma studio",

@@ -24,6 +24,11 @@ const pagesRoutes = require("./routes/pages");
 
 const app = express();
 
+// Vercel terminates TLS at its edge and forwards the client IP in X-Forwarded-For.
+// Without this, express-rate-limit throws ERR_ERL_UNEXPECTED_X_FORWARDED_FOR and
+// keys every request off the same proxy IP.
+app.set("trust proxy", 1);
+
 // Middleware
 const allowedOrigins = [
   config.clientUrl,
